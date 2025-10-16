@@ -9,6 +9,16 @@ const Index = () => {
   const [balance, setBalance] = useState(100000);
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState('');
+  const [balanceHistory, setBalanceHistory] = useState<Array<{
+    id: number;
+    amount: number;
+    type: 'add' | 'remove' | 'edit';
+    date: string;
+    previousBalance: number;
+    newBalance: number;
+  }>>([]);
+  const [showQuickAdd, setShowQuickAdd] = useState(false);
+  const [quickAmount, setQuickAmount] = useState('');
 
   const transactions = [
     {
@@ -33,6 +43,35 @@ const Index = () => {
     { icon: 'QrCode', label: 'QR-код', id: 'qr' },
     { icon: 'Shield', label: 'Защита', id: 'protection' }
   ];
+
+  const handleBalanceChange = (newBalance: number, type: 'add' | 'remove' | 'edit') => {
+    const now = new Date();
+    const historyEntry = {
+      id: Date.now(),
+      amount: Math.abs(newBalance - balance),
+      type,
+      date: now.toLocaleString('ru-RU', { 
+        day: 'numeric', 
+        month: 'long', 
+        hour: '2-digit', 
+        minute: '2-digit' 
+      }),
+      previousBalance: balance,
+      newBalance
+    };
+    setBalanceHistory(prev => [historyEntry, ...prev]);
+    setBalance(newBalance);
+  };
+
+  const handleAddMoney = (amount: number) => {
+    handleBalanceChange(balance + amount, 'add');
+  };
+
+  const handleRemoveMoney = (amount: number) => {
+    if (balance >= amount) {
+      handleBalanceChange(balance - amount, 'remove');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#F7FFFD] to-[#E8F5F1] pb-20">
@@ -75,7 +114,7 @@ const Index = () => {
                     className="p-2 bg-[#98D8C8] hover:bg-[#7BC4B0] rounded-xl transition-colors"
                     onClick={() => {
                       if (editValue && !isNaN(Number(editValue))) {
-                        setBalance(Number(editValue));
+                        handleBalanceChange(Number(editValue), 'edit');
                       }
                       setIsEditing(false);
                       setEditValue('');
@@ -119,18 +158,84 @@ const Index = () => {
           </div>
 
           <div className="grid grid-cols-2 gap-3 mb-6">
-            {quickActions.map((action) => (
-              <Card 
-                key={action.id}
-                className="bg-white/90 backdrop-blur border-0 shadow-sm p-6 flex flex-col items-center justify-center hover:shadow-md transition-all cursor-pointer rounded-3xl"
-              >
-                <div className="w-12 h-12 rounded-2xl bg-gray-100 flex items-center justify-center mb-3">
-                  <Icon name={action.icon} size={28} className="text-gray-900" />
-                </div>
-                <span className="text-sm font-medium text-gray-900">{action.label}</span>
-              </Card>
-            ))}
+            <Card 
+              onClick={() => setShowQuickAdd(true)}
+              className="bg-gradient-to-br from-emerald-500 to-emerald-600 border-0 shadow-lg p-6 flex flex-col items-center justify-center hover:shadow-xl transition-all cursor-pointer rounded-3xl"
+            >
+              <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center mb-3">
+                <Icon name="Plus" size={28} className="text-white" />
+              </div>
+              <span className="text-sm font-semibold text-white">Пополнить</span>
+            </Card>
+            
+            <Card 
+              onClick={() => {
+                const amount = prompt('Сколько снять?');
+                if (amount && !isNaN(Number(amount))) {
+                  handleRemoveMoney(Number(amount));
+                }
+              }}
+              className="bg-gradient-to-br from-red-500 to-red-600 border-0 shadow-lg p-6 flex flex-col items-center justify-center hover:shadow-xl transition-all cursor-pointer rounded-3xl"
+            >
+              <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center mb-3">
+                <Icon name="Minus" size={28} className="text-white" />
+              </div>
+              <span className="text-sm font-semibold text-white">Снять</span>
+            </Card>
           </div>
+
+          {showQuickAdd && (
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-end">
+              <div className="w-full max-w-md mx-auto bg-white rounded-t-3xl p-6 animate-fade-in">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-semibold text-gray-900">Пополнить баланс</h3>
+                  <button 
+                    onClick={() => {
+                      setShowQuickAdd(false);
+                      setQuickAmount('');
+                    }}
+                    className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
+                  >
+                    <Icon name="X" size={24} className="text-gray-600" />
+                  </button>
+                </div>
+                
+                <input
+                  type="number"
+                  value={quickAmount}
+                  onChange={(e) => setQuickAmount(e.target.value)}
+                  className="w-full text-3xl font-semibold text-gray-900 bg-gray-50 rounded-2xl px-4 py-4 mb-4 focus:outline-none focus:ring-2 focus:ring-[#98D8C8]"
+                  placeholder="0"
+                  autoFocus
+                />
+                
+                <div className="grid grid-cols-3 gap-2 mb-4">
+                  {[1000, 5000, 10000, 25000, 50000, 100000].map((amount) => (
+                    <button
+                      key={amount}
+                      onClick={() => setQuickAmount(amount.toString())}
+                      className="py-3 px-4 bg-gray-100 hover:bg-[#98D8C8] hover:text-white rounded-xl transition-colors font-medium"
+                    >
+                      {amount.toLocaleString('ru-RU')} ₽
+                    </button>
+                  ))}
+                </div>
+                
+                <button
+                  onClick={() => {
+                    if (quickAmount && !isNaN(Number(quickAmount))) {
+                      handleAddMoney(Number(quickAmount));
+                      setShowQuickAdd(false);
+                      setQuickAmount('');
+                    }
+                  }}
+                  className="w-full py-4 bg-gradient-to-r from-[#98D8C8] to-[#7BC4B0] text-white font-semibold rounded-2xl hover:shadow-lg transition-all"
+                >
+                  Пополнить
+                </button>
+              </div>
+            </div>
+          )}
 
           <Card className="bg-gradient-to-br from-[#98D8C8] to-[#7BC4B0] border-0 shadow-lg rounded-3xl overflow-hidden mb-6">
             <div className="p-6">
@@ -149,30 +254,60 @@ const Index = () => {
 
           <Card className="bg-white/90 backdrop-blur border-0 shadow-sm rounded-3xl p-4 mb-4">
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-xl font-semibold text-gray-900">История</h2>
-              <Button variant="ghost" size="sm" className="text-[#98D8C8] hover:text-[#7BC4B0] hover:bg-[#98D8C8]/10">
-                Все
-              </Button>
+              <h2 className="text-xl font-semibold text-gray-900">История изменений</h2>
             </div>
             
             <div className="space-y-3">
-              {transactions.map((transaction) => (
-                <div 
-                  key={transaction.id}
-                  className="flex items-start gap-3 p-3 rounded-2xl hover:bg-gray-50 transition-colors cursor-pointer"
-                >
-                  <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center flex-shrink-0">
-                    <Icon name={transaction.icon} size={20} className="text-gray-700" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-gray-900 truncate">{transaction.name}</p>
-                    <p className="text-xs text-gray-500">{transaction.date} • {transaction.category}</p>
-                  </div>
-                  <div className="text-right flex-shrink-0">
-                    <p className="font-semibold text-gray-900">{transaction.amount.toFixed(2)} ₽</p>
-                  </div>
+              {balanceHistory.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  <Icon name="History" size={48} className="mx-auto mb-2 opacity-50" />
+                  <p className="text-sm">Изменений пока нет</p>
                 </div>
-              ))}
+              ) : (
+                balanceHistory.map((entry) => (
+                  <div 
+                    key={entry.id}
+                    className="flex items-start gap-3 p-3 rounded-2xl hover:bg-gray-50 transition-colors"
+                  >
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                      entry.type === 'add' ? 'bg-emerald-100' : 
+                      entry.type === 'remove' ? 'bg-red-100' : 
+                      'bg-blue-100'
+                    }`}>
+                      <Icon 
+                        name={entry.type === 'add' ? 'Plus' : entry.type === 'remove' ? 'Minus' : 'Edit2'} 
+                        size={20} 
+                        className={
+                          entry.type === 'add' ? 'text-emerald-600' : 
+                          entry.type === 'remove' ? 'text-red-600' : 
+                          'text-blue-600'
+                        } 
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-gray-900">
+                        {entry.type === 'add' ? 'Пополнение' : 
+                         entry.type === 'remove' ? 'Снятие' : 
+                         'Редактирование'}
+                      </p>
+                      <p className="text-xs text-gray-500">{entry.date}</p>
+                      <p className="text-xs text-gray-400 mt-1">
+                        {entry.previousBalance.toLocaleString('ru-RU', { minimumFractionDigits: 2 })} ₽ → {entry.newBalance.toLocaleString('ru-RU', { minimumFractionDigits: 2 })} ₽
+                      </p>
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                      <p className={`font-semibold ${
+                        entry.type === 'add' ? 'text-emerald-600' : 
+                        entry.type === 'remove' ? 'text-red-600' : 
+                        'text-blue-600'
+                      }`}>
+                        {entry.type === 'add' ? '+' : entry.type === 'remove' ? '-' : ''}
+                        {entry.amount.toLocaleString('ru-RU', { minimumFractionDigits: 2 })} ₽
+                      </p>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </Card>
 
