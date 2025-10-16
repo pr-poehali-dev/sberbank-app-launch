@@ -51,7 +51,7 @@ const Index = () => {
           <div className="mb-6">
             <p className="text-sm text-gray-600 mb-1">В кошельке</p>
             <div className="flex items-center gap-3">
-              <h1 className="text-5xl font-semibold text-gray-900">51,88 ₽</h1>
+              <h1 className="text-5xl font-semibold text-gray-900">100 000,00 ₽</h1>
               <button className="p-2">
                 <Icon name="Eye" size={24} className="text-gray-600" />
               </button>
