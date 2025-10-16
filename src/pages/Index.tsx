@@ -5,6 +5,7 @@ import Icon from '@/components/ui/icon';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('home');
+  const [isBalanceVisible, setIsBalanceVisible] = useState(true);
 
   const transactions = [
     {
@@ -51,11 +52,16 @@ const Index = () => {
           <div className="mb-6">
             <p className="text-sm text-gray-600 mb-1">В кошельке</p>
             <div className="flex items-center gap-3">
-              <h1 className="text-5xl font-semibold text-gray-900">100 000,00 ₽</h1>
-              <button className="p-2">
-                <Icon name="Eye" size={24} className="text-gray-600" />
+              <h1 className="text-5xl font-semibold text-gray-900 transition-all duration-300 animate-fade-in">
+                {isBalanceVisible ? '100 000,00 ₽' : '••• •••,•• ₽'}
+              </h1>
+              <button 
+                className="p-2 hover:bg-white/50 rounded-xl transition-colors"
+                onClick={() => setIsBalanceVisible(!isBalanceVisible)}
+              >
+                <Icon name={isBalanceVisible ? "Eye" : "EyeOff"} size={24} className="text-gray-600" />
               </button>
-              <button className="p-2">
+              <button className="p-2 hover:bg-white/50 rounded-xl transition-colors">
                 <Icon name="MoreHorizontal" size={24} className="text-gray-600" />
               </button>
             </div>
