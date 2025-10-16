@@ -36,14 +36,20 @@ const Index = () => {
       <div className="max-w-md mx-auto">
         <div className="px-4 pt-6 pb-4">
           <div className="flex items-center justify-between mb-6">
-            <button className="w-12 h-12 rounded-full bg-white/80 backdrop-blur flex items-center justify-center">
-              <Icon name="User" size={24} className="text-gray-700" />
-            </button>
+            <div className="flex items-center gap-3">
+              <button className="w-12 h-12 rounded-full bg-gradient-to-br from-[#98D8C8] to-[#7BC4B0] flex items-center justify-center shadow-sm">
+                <span className="text-white font-semibold text-lg">АЛ</span>
+              </button>
+              <div>
+                <p className="text-sm font-semibold text-gray-900">Александр С Ломакин</p>
+                <p className="text-xs text-gray-600">Личный счет</p>
+              </div>
+            </div>
             <div className="flex gap-2">
-              <button className="w-12 h-12 rounded-full bg-white/80 backdrop-blur flex items-center justify-center">
+              <button className="w-12 h-12 rounded-full bg-white/80 backdrop-blur flex items-center justify-center hover:bg-white transition-colors">
                 <Icon name="Moon" size={24} className="text-gray-700" />
               </button>
-              <button className="w-12 h-12 rounded-full bg-white/80 backdrop-blur flex items-center justify-center">
+              <button className="w-12 h-12 rounded-full bg-white/80 backdrop-blur flex items-center justify-center hover:bg-white transition-colors">
                 <Icon name="Grid3x3" size={24} className="text-gray-700" />
               </button>
             </div>
