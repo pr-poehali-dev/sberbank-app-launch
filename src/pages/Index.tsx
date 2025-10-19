@@ -19,6 +19,34 @@ const Index = () => {
   }>>([]);
   const [showQuickAdd, setShowQuickAdd] = useState(false);
   const [quickAmount, setQuickAmount] = useState('');
+  const [showFortune, setShowFortune] = useState(false);
+  const [selectedCards, setSelectedCards] = useState<number[]>([]);
+  const [fortuneResult, setFortuneResult] = useState<string | null>(null);
+
+  const fortuneCards = [
+    { id: 1, emoji: '😊', name: 'Ребёнок', number: 4 },
+    { id: 2, emoji: '💰', name: 'Деньги', number: 10 },
+    { id: 3, emoji: '😢', name: 'Одиночество', number: 62 },
+    { id: 4, emoji: '☕', name: 'Общение', number: 14 },
+    { id: 5, emoji: '😔', name: 'Бедность', number: 20 },
+    { id: 6, emoji: '🎨', name: 'Творчество', number: 33 },
+    { id: 7, emoji: '👨', name: 'Мужчина', number: 28 },
+    { id: 8, emoji: '💍', name: 'Государство', number: 88 },
+    { id: 9, emoji: '🌙', name: 'Тайна', number: 73 },
+    { id: 10, emoji: '🤔', name: 'Вопрос', number: 67 },
+  ];
+
+  const drawRandomCards = () => {
+    setSelectedCards([]);
+    setFortuneResult(null);
+    
+    setTimeout(() => {
+      const shuffled = [...Array(fortuneCards.length)].map((_, i) => i).sort(() => Math.random() - 0.5);
+      const selected = shuffled.slice(0, 5);
+      setSelectedCards(selected);
+      setFortuneResult('Карты вытянуты! Позвоните для полной расшифровки расклада.');
+    }, 800);
+  };
 
   const transactions = [
     {
@@ -184,6 +212,38 @@ const Index = () => {
             </Card>
           </div>
 
+          <Card 
+            onClick={() => setShowFortune(true)}
+            className="bg-gradient-to-br from-purple-500 via-pink-500 to-purple-600 border-0 shadow-lg p-6 mb-6 hover:shadow-xl transition-all cursor-pointer rounded-3xl"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center">
+                  <span className="text-3xl">🔮</span>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-white">Гадание на картах</h3>
+                  <p className="text-sm text-white/80">Узнай своё будущее</p>
+                </div>
+              </div>
+              <Icon name="Sparkles" size={24} className="text-white" />
+            </div>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-blue-500 to-blue-600 border-0 shadow-lg p-6 mb-6 rounded-3xl">
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center">
+                <Icon name="Phone" size={28} className="text-white" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-white">Контакты</h3>
+                <a href="tel:+79069606037" className="text-sm text-white/90 hover:text-white transition-colors">
+                  +7 (906) 960-60-37
+                </a>
+              </div>
+            </div>
+          </Card>
+
           {showQuickAdd && (
             <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-end">
               <div className="w-full max-w-md mx-auto bg-white rounded-t-3xl p-6 animate-fade-in">
@@ -233,6 +293,102 @@ const Index = () => {
                 >
                   Пополнить
                 </button>
+              </div>
+            </div>
+          )}
+
+          {showFortune && (
+            <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+              <div className="w-full max-w-md bg-gradient-to-br from-purple-500 via-pink-500 to-purple-600 rounded-3xl p-6 animate-fade-in shadow-2xl">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-3">
+                    <span className="text-4xl">🔮</span>
+                    <h3 className="text-2xl font-semibold text-white">Гадание</h3>
+                  </div>
+                  <button 
+                    onClick={() => {
+                      setShowFortune(false);
+                      setSelectedCards([]);
+                      setFortuneResult(null);
+                    }}
+                    className="p-2 hover:bg-white/20 rounded-xl transition-colors"
+                  >
+                    <Icon name="X" size={24} className="text-white" />
+                  </button>
+                </div>
+
+                {!fortuneResult ? (
+                  <>
+                    <p className="text-white/90 text-center mb-6">
+                      Выберите 3 карты, чтобы узнать предсказание
+                    </p>
+                    
+                    <div className="grid grid-cols-4 gap-3 mb-6">
+                      {fortuneCards.map((card) => (
+                        <button
+                          key={card.id}
+                          onClick={() => {
+                            if (selectedCards.includes(card.id)) {
+                              setSelectedCards(selectedCards.filter(id => id !== card.id));
+                            } else if (selectedCards.length < 3) {
+                              setSelectedCards([...selectedCards, card.id]);
+                            }
+                          }}
+                          className={`aspect-square rounded-2xl transition-all ${
+                            selectedCards.includes(card.id)
+                              ? 'bg-white scale-95 shadow-lg'
+                              : 'bg-white/20 backdrop-blur hover:bg-white/30 hover:scale-105'
+                          }`}
+                        >
+                          <span className="text-4xl">{card.emoji}</span>
+                        </button>
+                      ))}
+                    </div>
+
+                    <button
+                      onClick={() => {
+                        if (selectedCards.length === 3) {
+                          const selected = fortuneCards.filter(c => selectedCards.includes(c.id));
+                          const result = `${selected.map(c => c.meaning).join(' ')} 🌟`;
+                          setFortuneResult(result);
+                        }
+                      }}
+                      disabled={selectedCards.length < 3}
+                      className={`w-full py-4 rounded-2xl font-semibold transition-all ${
+                        selectedCards.length === 3
+                          ? 'bg-white text-purple-600 hover:shadow-lg'
+                          : 'bg-white/30 text-white/50 cursor-not-allowed'
+                      }`}
+                    >
+                      {selectedCards.length === 3 ? 'Узнать предсказание' : `Выбрано ${selectedCards.length}/3`}
+                    </button>
+                  </>
+                ) : (
+                  <div className="text-center">
+                    <div className="bg-white/20 backdrop-blur rounded-2xl p-6 mb-6">
+                      <div className="flex justify-center gap-4 mb-4">
+                        {fortuneCards
+                          .filter(c => selectedCards.includes(c.id))
+                          .map(card => (
+                            <span key={card.id} className="text-5xl">{card.emoji}</span>
+                          ))}
+                      </div>
+                      <p className="text-white text-lg font-medium leading-relaxed">
+                        {fortuneResult}
+                      </p>
+                    </div>
+                    
+                    <button
+                      onClick={() => {
+                        setSelectedCards([]);
+                        setFortuneResult(null);
+                      }}
+                      className="w-full py-4 bg-white text-purple-600 rounded-2xl font-semibold hover:shadow-lg transition-all"
+                    >
+                      Погадать еще раз
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           )}
