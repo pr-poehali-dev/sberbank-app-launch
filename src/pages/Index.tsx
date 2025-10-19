@@ -214,19 +214,28 @@ const Index = () => {
 
           <Card 
             onClick={() => setShowFortune(true)}
-            className="bg-gradient-to-br from-purple-500 via-pink-500 to-purple-600 border-0 shadow-lg p-6 mb-6 hover:shadow-xl transition-all cursor-pointer rounded-3xl"
+            className="bg-gradient-to-br from-purple-500 via-violet-600 to-purple-700 border-0 shadow-xl p-6 mb-6 hover:shadow-2xl transition-all cursor-pointer rounded-3xl relative overflow-hidden"
           >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center">
-                  <span className="text-3xl">🔮</span>
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-white">Гадание на картах</h3>
-                  <p className="text-sm text-white/80">Узнай своё будущее</p>
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16" />
+            <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full -ml-12 -mb-12" />
+            <div className="relative z-10">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center">
+                    <Icon name="Sparkles" size={32} className="text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-white">Гадание на картах</h3>
+                    <p className="text-sm text-white/80">Узнай своё будущее</p>
+                  </div>
                 </div>
               </div>
-              <Icon name="Sparkles" size={24} className="text-white" />
+              <div className="flex items-center gap-2 text-white/90">
+                <Icon name="Phone" size={18} className="text-white" />
+                <a href="tel:+79069606037" className="text-sm font-medium hover:text-white transition-colors" onClick={(e) => e.stopPropagation()}>
+                  +7 906 960-60-37
+                </a>
+              </div>
             </div>
           </Card>
 
@@ -317,78 +326,84 @@ const Index = () => {
                   </button>
                 </div>
 
-                {!fortuneResult ? (
-                  <>
-                    <p className="text-white/90 text-center mb-6">
-                      Выберите 3 карты, чтобы узнать предсказание
+                <div className="bg-white/10 backdrop-blur rounded-3xl p-5 mb-6">
+                  <div className="flex items-center gap-3 mb-3">
+                    <Icon name="Phone" size={24} className="text-white" />
+                    <div>
+                      <p className="text-white/80 text-sm">Записаться на сеанс</p>
+                      <a href="tel:+79069606037" className="text-xl font-bold text-white hover:text-yellow-300 transition-colors">
+                        +7 906 960-60-37
+                      </a>
+                    </div>
+                  </div>
+                </div>
+
+                {selectedCards.length === 0 ? (
+                  <div className="text-center">
+                    <div className="mb-8">
+                      <img 
+                        src="https://cdn.poehali.dev/files/e9da8219-e974-4603-9f81-1bf75dbe788e.png" 
+                        alt="Карты гадания" 
+                        className="w-full max-w-sm rounded-3xl shadow-2xl mb-6 mx-auto"
+                      />
+                    </div>
+                    <p className="text-white/90 text-lg mb-8 max-w-xs mx-auto">
+                      Сконцентрируйтесь на своём вопросе и вытяните карты
                     </p>
+                    <button
+                      onClick={drawRandomCards}
+                      className="px-8 py-4 bg-gradient-to-r from-yellow-400 to-yellow-500 text-purple-900 font-bold text-lg rounded-2xl hover:shadow-xl transition-all"
+                    >
+                      Вытянуть карты
+                    </button>
+                  </div>
+                ) : (
+                  <div className="text-center">
+                    <div className="grid grid-cols-2 gap-4 mb-6">
+                      {selectedCards.map((cardIndex, index) => {
+                        const card = fortuneCards[cardIndex];
+                        return (
+                          <div
+                            key={index}
+                            className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-3xl p-6 shadow-xl transform hover:scale-105 transition-transform animate-fade-in"
+                            style={{ animationDelay: `${index * 100}ms` }}
+                          >
+                            <div className="text-center">
+                              <div className="text-6xl mb-3">{card.emoji}</div>
+                              <div className="text-3xl font-bold text-purple-600 mb-2">{card.number}</div>
+                              <div className="text-sm font-semibold text-gray-700 uppercase tracking-wide">{card.name}</div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
                     
-                    <div className="grid grid-cols-4 gap-3 mb-6">
-                      {fortuneCards.map((card) => (
-                        <button
-                          key={card.id}
-                          onClick={() => {
-                            if (selectedCards.includes(card.id)) {
-                              setSelectedCards(selectedCards.filter(id => id !== card.id));
-                            } else if (selectedCards.length < 3) {
-                              setSelectedCards([...selectedCards, card.id]);
-                            }
-                          }}
-                          className={`aspect-square rounded-2xl transition-all ${
-                            selectedCards.includes(card.id)
-                              ? 'bg-white scale-95 shadow-lg'
-                              : 'bg-white/20 backdrop-blur hover:bg-white/30 hover:scale-105'
-                          }`}
-                        >
-                          <span className="text-4xl">{card.emoji}</span>
-                        </button>
-                      ))}
+                    <div className="bg-white/10 backdrop-blur rounded-3xl p-5 mb-4">
+                      <div className="flex items-start gap-3">
+                        <Icon name="Info" size={24} className="text-yellow-300 flex-shrink-0 mt-1" />
+                        <p className="text-white/90 text-sm leading-relaxed">
+                          {fortuneResult}
+                        </p>
+                      </div>
                     </div>
 
                     <button
-                      onClick={() => {
-                        if (selectedCards.length === 3) {
-                          const selected = fortuneCards.filter(c => selectedCards.includes(c.id));
-                          const result = `${selected.map(c => c.meaning).join(' ')} 🌟`;
-                          setFortuneResult(result);
-                        }
-                      }}
-                      disabled={selectedCards.length < 3}
-                      className={`w-full py-4 rounded-2xl font-semibold transition-all ${
-                        selectedCards.length === 3
-                          ? 'bg-white text-purple-600 hover:shadow-lg'
-                          : 'bg-white/30 text-white/50 cursor-not-allowed'
-                      }`}
+                      onClick={drawRandomCards}
+                      className="w-full py-4 bg-white/20 hover:bg-white/30 text-white font-semibold rounded-2xl transition-all backdrop-blur"
                     >
-                      {selectedCards.length === 3 ? 'Узнать предсказание' : `Выбрано ${selectedCards.length}/3`}
-                    </button>
-                  </>
-                ) : (
-                  <div className="text-center">
-                    <div className="bg-white/20 backdrop-blur rounded-2xl p-6 mb-6">
-                      <div className="flex justify-center gap-4 mb-4">
-                        {fortuneCards
-                          .filter(c => selectedCards.includes(c.id))
-                          .map(card => (
-                            <span key={card.id} className="text-5xl">{card.emoji}</span>
-                          ))}
-                      </div>
-                      <p className="text-white text-lg font-medium leading-relaxed">
-                        {fortuneResult}
-                      </p>
-                    </div>
-                    
-                    <button
-                      onClick={() => {
-                        setSelectedCards([]);
-                        setFortuneResult(null);
-                      }}
-                      className="w-full py-4 bg-white text-purple-600 rounded-2xl font-semibold hover:shadow-lg transition-all"
-                    >
-                      Погадать еще раз
+                      Вытянуть снова
                     </button>
                   </div>
                 )}
+
+                <div className="bg-gradient-to-r from-yellow-400/20 to-yellow-500/20 backdrop-blur rounded-2xl p-4 border border-yellow-300/30 mt-6">
+                  <div className="flex items-center gap-3">
+                    <Icon name="Star" size={20} className="text-yellow-300" />
+                    <p className="text-white/90 text-sm">
+                      Профессиональное гадание • Опытный мастер • Точные предсказания
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           )}
